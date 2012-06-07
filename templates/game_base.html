@@ -1,0 +1,46 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<script type="text/javascript" src="/site_media/js/jquery.js"></script>
+<link rel="stylesheet" href="/site_media/css/style_base.css" type="text/css">	
+{% block head %}{% endblock %}
+<title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+<div align="center">
+<div id="total">
+<div id="menu" align="center">
+	<a href="/game/compete/{{ roach.id }}/" title="Позвонить менеджеру">Поганяться</a>
+	{% if work %}
+	<a href="/game/work/abort/{{ roach.id }}/" title="Уйти с работы и не получить ничего">Уйти с работы</a>
+	{% else %}
+	<a href="/game/work/{{ roach.id }}/" title="Устроиться на работу и получить деньги">Батрачить</a>
+	{% endif %}
+	{% if train %}
+	<a href="/game/train/abort/{{ roach.id }}/" title="Уйти от тренера и не получить опыта">Покинуть тренеровку</a>
+	{% else %}
+	<a href="/game/train/{{ roach.id }}/" title="Нанять тренера и получить опыт">Нанять тренера</a>
+	{% endif %}
+	
+	{% if work %}
+	<br>Осталось проработать:{% if hours %}{{ hours }} ч.,{% endif %} {{ minutes }} мин., {{ seconds }} сек.
+	{% else %}
+	{% if train %}
+	<br>Осталось по6егать:{% if hours %}{{ hours }} ч.,{% endif %} {{ minutes }} мин., {{ seconds }} сек.
+	{% endif %}
+	{% endif %}
+{% block menu %}
+{% endblock %}		
+</div>
+<div id="user_cont">
+{% block user_cont %}
+{% endblock %}
+</div>
+<div id="main_cont">
+{% block content %}
+{% endblock %}
+</div>
+</div>
+</div>
+</body>
+</html>

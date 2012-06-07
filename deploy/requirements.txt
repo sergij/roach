@@ -1,0 +1,12 @@
+Django==1.3
+-e hg+https://bitbucket.org/andrewgodwin/south@8e5a21d8dd6b#egg=South
+django-debug-toolbar>=0.8.4
+-e svn+http://django-filebrowser.googlecode.com/svn/trunk@r696#egg=django_filebrowser
+-e git+https://github.com/sehmaschine/django-grappelli.git@131b5c9ff96bc85ba785#egg=django-grappelli
+-e git+https://github.com/zakhar/django-social-auth.git@022e6770dacc4f52ab2227180de2cfd3b7081765#egg=social_auth
+-e hg+https://bitbucket.org/ubernostrum/django-registration#egg=django_registration
+-e git+https://github.com/zakhar/sorl-thumbnail.git#egg=sorl_thumbnail
+#django_compressor
+-e hg+https://bitbucket.org/russmo/django-storages-multi#egg=django-storages-multi
+#django-storages
+boto

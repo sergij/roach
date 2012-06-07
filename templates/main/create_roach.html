@@ -1,0 +1,30 @@
+﻿{% extends "base.html" %}
+{% block title %}Создаем таракана{% endblock %}
+{% block content %}
+
+<div align="center">
+<div id="total">
+	<h3 align='center'>Для участия в тараканьих бегах необходимо завести таракана:</h3>
+{% if errors %}
+<div class="error">
+	{{ errors }}
+</div>
+{% endif %}
+<form method="post" action="/game/create_roach/">
+{% csrf_token %}
+<table width="250">
+{% for field in form %}
+<tr>
+    <td>{{ field.label_tag }}</td>
+    <td>{{ field }}</td>
+   {% if field.errors %}
+   <tr><td colspan=2 align="center"><div style="color:red">{{ field.errors }}</div></td></tr>
+   {% endif %}
+</tr>
+{% endfor %}
+</table>
+<input type="submit" value="Создать" />
+</form>
+
+</div>
+{% endblock %}

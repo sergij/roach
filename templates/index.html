@@ -1,0 +1,49 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<link rel="stylesheet" href="/site_media/css/style_base.css" type="text/css">
+<title>У каждого в голове свои тараканы</title>
+</head>
+<body style='background:#e8e6e6;'>
+		<h1 align='center'>Тараканьи бега</h1>
+		<div align="center">
+			{% if user.is_superuser %}
+			<p>Осторожно Вы можете удалить записи всех</br> гонок за указаный промежуток с конца!</p>
+			<div id="round" style="width:350px;">
+			<form method="post" action="/delete_race/">
+			{% csrf_token %}
+			<table width="250">
+			<tr>
+			    <td>Количество дней:</td>
+			    <td><input type="text" name="days" /><input type="submit" value="Удалить" /></td>
+			</tr>
+			</table>
+			</form>
+			</div>
+			{% endif %}
+		{% if user.is_authenticated %}
+		Вы онлайн как: {{ user.username }}
+		  <a href="/accounts/logout/">уйти</a>
+		  <br/><a href="/game/">В игру</a>
+		{% else %}
+		<div id="round" style="width:350px;">
+		<form method="post" action="/accounts/index_login/">
+		{% csrf_token %}
+		<table width="250">
+		<tr>
+		    <td>Имя:</td>
+		    <td colspan="2"><input type="text" name="username" /></td>
+		</tr><tr>
+		<td>Пароль:</td>
+		<td><input type="password" name="password"/></td>
+		<td><input type="submit" value="Войти" /></td>
+		</tr>
+		</table>
+		<input type="hidden" name="next" value="/" />
+		<a href="/accounts/registration/">Регистрация</a>
+		</form>
+		</div>
+		{% endif %}
+		</div>
+</body>
+</html>

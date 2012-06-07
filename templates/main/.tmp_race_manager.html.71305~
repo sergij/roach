@@ -1,0 +1,100 @@
+{% extends "game_base.html" %}
+{% block head %}{% endblock %}
+
+{% block title %}Кабинет менеджера{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="span-24 last">
+		<h1 align='center'>Тараканьи бега</h1>
+	</div>
+	<div class="span-5" id="opponent">
+		{% if opponent %}
+		{% csrf_token %}
+		<table width="150px">
+		<tr>
+		    <td  align="right" colspan="2">Имя: {{ opponent.roach_name }}</td>
+		</tr>
+		<tr>
+		    <td  align="right">Пол</td>
+			{% if opponent.sex %}
+			<td  align="left">Таракан</td>
+			{% else %}
+			<td  align="left">Тараканиха</td>
+			{% endif %}
+		</tr>
+		<tr>
+			<td>Выносливость:</td>
+			<td align="right">{{ opponent.pow_skill }}</td>
+		</tr>
+		<tr>
+			<td>Интелект:</td>
+			<td align="right">{{ opponent.intel_skill }}</td>
+		</tr>
+		<tr>
+			<td>Скорость:</td>
+			<td align="right">{{ opponent.speed_skill }}</td>
+		</tr>
+		<tr>
+			<td>Хитрость:</td>
+			<td align="right">{{ opponent.trick_skill }}</td>
+		</tr>
+		<tr>
+			<td>Уворотливость:</td>
+			<td align="right">{{ opponent.agil_skill }}</td>
+		</tr>
+		</table>
+		<form method="post" action="/game/compete/{{ roach.id}}/">
+		{% csrf_token %}
+		<input type="hidden" name="id" value="{{ roach.id }}" />
+		<input type="submit" value="Выбрать другого" />
+		</form>
+		<form method="post" action="/game/create_race/">
+		{% csrf_token %}
+		<input type="hidden" name="id" value="{{ opponent.id }}" />
+		<input type="hidden" name="my_id" value="{{ roach.id }}" />
+		<input type="submit" value="Гоняться" />
+		</form>
+		{% else %}
+		<br>
+		{% endif %}
+	</div>
+	<div class="span-13">
+		{% if log %}
+		{% for line in log %}
+		<p>{{ line.0 }}</p>
+		{% endfor %}
+		{% else %}
+		<br>
+		{% endif %}
+	</div>
+	<div class="span-5 last" id="user">
+		<p>{{ roach.roach_name }}&nbsp;&nbsp;&nbsp;Баланс:&nbsp;{{ roach.money_2 }}</p>
+		<table>
+		<tr>
+			<td>Выносливость:</td>
+			<td>{{ roach.pow_skill }}</td>
+		</tr>
+		<tr>
+			<td>Интелект:</td>
+			<td>{{ roach.intel_skill }}</td>
+		</tr>
+		<tr>
+			<td>Скорость:</td>
+			<td>{{ roach.speed_skill }}</td>
+		</tr>
+		<tr>
+			<td>Хитрость:</td>
+			<td>{{ roach.trick_skill }}</td>
+		</tr>
+		<tr>
+			<td>Уворотливость:</td>
+			<td>{{ roach.agil_skill }}</td>
+		</tr>
+		</table>
+		<a href="/game/" id="hr">В нору</a>
+	</div>
+</div>
+
+{% endblock %}
