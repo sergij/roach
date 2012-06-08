@@ -1,0 +1,318 @@
+{% extends "game_base.html" %}
+{% block head %}
+<script type="text/javascript">
+function mouseOn( id ){
+	$("#" + id).width("400px");
+	$("#" + id).height("auto");
+}
+function mouseOff(id){
+	$("#" + id).width("289px");
+	$("#" + id).height("auto");
+}
+	
+function next() {
+$.post("/game/next/", { play: {{ play.id }} });
+$("#my_used").text('');
+$("#en_used").text('');
+$("#ingame").oneTime("2s", function() {
+    play()
+    });
+}
+
+function bju(id) {
+$.post("/game/bju/", {id : id , play: {{ play.id }} },
+function(data){
+if (data[0].denied == true){
+		alert("Не правильно ходиш!");
+	}
+	else{
+	cards = data[0].cards
+	s = '';
+	for (i = 0; i < cards.length; i++){
+		s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+	}
+	$("#cards").text("")
+	$("#cards").append(s)
+	my_cards = data[0].my_used
+	if (my_cards.length>0){
+		$("#my_used").text('');
+		s = '';
+		for (i = 0; i < my_cards.length; i++){
+			s += "<img src= \"/site_media/cards/" + my_cards[i][0] + "_" + my_cards[i][1] + ".jpg\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+		}
+		$("#my_used").append(s);
+	}
+	else{
+		$("#my_used").text("");
+	}
+	$("#ingame").oneTime("3s", function() {
+    play()
+    });
+	}
+  }
+, "json");
+}
+
+function beru(id) {
+$.post("/game/beru/", {play: {{ play.id }} },
+function(data){
+        cards = data[0].cards
+		if (data[0].current == {{ user.gamer.id }})
+		{
+			s = '';
+			for (i = 0; i < cards.length; i++){
+				s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\" onclick=\"give(" + i + ")\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+			}
+		}
+		$("#my_used").text('');
+		$("#en_used").text('');
+	}
+  , "json");
+	$("#ingame").oneTime("3s", function() {
+    play()
+    });
+}
+
+function give(id) {
+$.post("/game/give/", {id : id , play: {{ play.id }} },
+function(data){
+	if (data[0].denied == true){
+		alert("Не правильно ходиш!");
+	}
+	else{
+	cards = data[0].cards
+	s = '';
+	for (i = 0; i < cards.length; i++){
+		s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\" id  WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+	}
+	$("#cards").text("")
+	$("#cards").append(s)
+	my_cards = data[0].my_used
+	if (my_cards.length>0){
+		$("#my_used").text('');
+		s = '';
+		for (i = 0; i < my_cards.length; i++){
+			s += "<img src= \"/site_media/cards/" + my_cards[i][0] + "_" + my_cards[i][1] + ".jpg\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+		}
+		$("#my_used").append(s);
+	}
+	else{
+		$("#my_used").text("");
+	}
+	$("#ingame").oneTime("3s", function() {
+    play()
+    });
+	}
+  }
+, "json");
+}
+
+function play() {
+  $.post("/game/play/" + {{ play.id }} + "/", { user: {{ user.id }} },
+  function(data){
+	status = $("#status").val();
+	if (data[0].abort == true){
+		parent.location='/game/';
+		alert("Ваш противник не-хо");
+	}
+	if (data[0].wait == false){
+		s = "<img src= \"/site_media/false.jpg\"  id=\"foto\" WIDTH=\"auto\" HEIGHT=\"100px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+		$("#opponent").text("")
+		$("#opponent").append(s)	
+		$("#opponent_status").text("Ожидает")
+	}
+	else{
+		s = "<img src= \"/site_media/true.jpg\" id=\"foto\" WIDTH=\"auto\" HEIGHT=\"100px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+		$("#opponent").text("")
+		$("#opponent").append(s)
+		$("#opponent_status").text("Думает")	
+	}
+  	if (data[0].wait == false && status == "false")
+	{
+		cards = data[0].cards
+		if (data[0].current == {{ user.gamer.id }})
+		{
+			s = '';
+			for (i = 0; i < cards.length; i++){
+				s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\" onclick=\"give(" + i + ")\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+			}
+			contr = "<input type=\"button\" onclick=\"next()\" value=\"Не хожу\"/>"
+		}
+		else{
+			s = '';
+			for (i = 0; i < cards.length; i++){
+				s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\" onclick=\"bju(" + i + ")\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+			}
+			contr = "<input type=\"button\" onclick=\"beru()\" value=\"Беру\"/>"
+		}
+		$("#cards").text("")
+		$("#cards").append(s)
+		$("#controls").text("")
+		$("#controls").append(contr)
+		
+    	//$("#ingame").stopTime('wait');
+		
+		s='';
+		$("#gamers").text("")
+		s += "<input type=\"hidden\" id=\"status\" value=\"true\"/>"
+		$("#gamers").append(s)
+	}
+  	else if (data[0].wait == true && status == "true") {
+		cards = data[0].cards
+		if (data[0].current == {{ user.gamer.id }})
+		{
+			s = '';
+			for (i = 0; i < cards.length; i++){
+				s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\" onclick=\"give(" + i + ")\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+			}
+			contr = "<input type=\"button\" onclick=\"next()\" value=\"Не хожу\"/>"
+		}
+		else{
+			s = '';
+			for (i = 0; i < cards.length; i++){
+				s += "<img src= \"/site_media/cards/" + cards[i][0] + "_" + cards[i][1] + ".jpg\"onclick=\"bju(" + i + ")\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+			}
+			contr = "<input type=\"button\" onclick=\"beru()\" value=\"Беру\"/>"
+		}
+		$("#cards").text("")
+		$("#cards").append(s)
+		$("#controls").text("")
+		$("#controls").append(contr)
+		
+		s='';
+		$("#gamers").text("")
+		s += "<input type=\"hidden\" id=\"status\" value=\"false\"/>"
+		$("#gamers").append(s);
+		s='';
+		//$("#ingame").everyTime("5s", 'wait', function(i) {
+	    //play() }, 0);
+	}
+	en_cards = data[0].en_cards
+	my_cards = data[0].my_used
+	if (en_cards.length>0){
+		$("#en_used").text("");
+		s = '';
+		for (i = 0; i < en_cards.length; i++){
+			s += "<img src= \"/site_media/cards/" + en_cards[i][0] + "_" + en_cards[i][1] + ".jpg\" WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+		}
+		$("#en_used").append(s);
+	}
+	else{
+		$("#en_used").text("");
+		$("#my_used").text("");
+	}	
+	if (my_cards.length>0){
+		$("#my_used").text('');
+		s = '';
+		for (i = 0; i < my_cards.length; i++){
+			s += "<img src= \"/site_media/cards/" + my_cards[i][0] + "_" + my_cards[i][1] + ".jpg\"  WIDTH=\"46px\" HEIGHT=\"67px\" ALIGN=\"middle\" BORDER=\"0\"/>";
+		}
+		$("#my_used").append(s);
+	}
+	else{
+		$("#my_used").text("");
+	}
+    }
+  , "json");
+}
+
+$(document).ready(function(){
+	$("#ingame").everyTime("5s", 'wait', function(i) {
+	    play()
+    }, 0);
+    
+	$("#ingame").oneTime(1, function() {
+    play()
+    });	
+});
+</script>
+<style>
+body
+{
+font-size:75%;
+font-family:verdana,arial,'sans serif';
+background-repeat:repeat-x;
+background-color:#FFFFF0;
+color:#000080;
+margin:70px;
+}
+#total{
+	background-color:#FFFFF0;
+	border:ridge;
+	height:350px;
+	}
+img {
+	border:double;
+}
+#foto{
+	border:none;
+}
+ul {list-style:circle;}
+ol {list-style:upper-roman;}
+
+a:link {color:#000080;}
+a:hover {color:red;}
+</style>
+{% endblock %}
+
+{% block title %}In Play{% endblock %}
+
+{% block content %}
+<input type="hidden" id="status" value="false"/>
+<div class="container" id="total">
+<hidden id="ingame"/>
+	<div class="span-24 last">
+		<br>
+	</div>
+	<div class="span-4">
+		<br>
+	</div>
+	
+	<div class="span-16">
+		<div class="span-8" id="opponent_status">
+			<p>Думает</p>
+		</div>
+		<div class="span-3" id="opponent">
+			<br>			
+		</div>
+		<div class="span-4" id="opponent_name">
+			<div valign="middle">
+				<h3>{{ enemy }}</h3>
+			</div>
+		</div>
+		<div class="span-1 last" id="super">
+			<h6>Козырь: 
+		 <img src= "/site_media/cards/{{ play.super }}.png" WIDTH="35px" HEIGHT="auto" ALIGN="middle" BORDER="0"/>
+		 </h6>
+		</div>
+		<div class="span-16 last" id="en_used" align="left" height="80">
+			Enemy<br>
+		</div>
+		<div class="span-16 last" id="my_used" align="left" height="80">
+			My<br>
+		</div>
+	</div>
+	
+	<div class="span-4 last">
+		<div align="right">
+		<form method="post" action="/game/">
+		{% csrf_token %}
+		<input type="hidden" name="play" value={{ play.id }} />
+		<input type="submit" value="На зовні"/>
+		</form>
+		</div>
+	</div>
+</div>
+
+<div class="container">
+	<div class="span-24 last" id="cards" align="center" height="80">
+	</div>
+	<div class="span-24 last">
+		<div align="center" id="controls">
+		</div>
+	</div>
+</div>
+<div align="center" id="gamers">
+</div>
+
+{% endblock %}
