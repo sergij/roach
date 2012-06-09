@@ -1,9 +1,13 @@
 ﻿{% extends "game_base.html" %}
-{% block head %}{% endblock %}
-{% block title %}Тараканьи бега{% endblock %}
+{% load thumbnail %}
+{% block page_title %}Тараканьи бега{% endblock %}
 {% block user_cont %}
-<div id="user">
-	<img class="avatar" src="/site_media/{{ roach.avatar.image }}">
+<div pk="user">
+	{% thumbnail roach.avatar "25" crop="center" as im %}
+	<img class="avatar" src="{{ im.url }}">
+	{% empty %}
+	<img class="avatar" src="{{ STATIC_URL }}main/img/av.bmp"
+	{% endthumbnail %}
 	<p>{{ roach.roach_name }}&nbsp;&nbsp;&nbsp;Баланс:&nbsp;{{ roach.money_2 }}</p>
 	<p>HP:{{ roach.power }}/{{ roach.level.max_power }}&nbsp;&nbsp;Експа:&nbsp;{{ roach.exp_now }}</p>
 	<table>
@@ -35,53 +39,59 @@
 <div class="error">{{ error }}</div>
 {% endif %}
 <div style="position:absolute; margin-left:30px;margin-top:30px; border:dotted;float:left;">
-	<a href="/game/compete/{{ roach.id }}/" title="Позвонить менеджеру"><img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp"></a>
+	<a href="{% url compete roach.pk %}" title="Позвонить менеджеру">
+	<img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp">
 	<br>
-	<a href="/game/compete/{{ roach.id }}/" title="Позвонить менеджеру">Поганяться</a>
+	Поганяться
+	</a>
 </div>
 
 <div style="position:absolute; margin-left:180px;margin-top:10px; border:dotted;float:left;">
 	{% if work %}
-	<a href="/game/work/abort/{{ roach.id }}/" title="Уйти с работы и не получить ничего">
-		<img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp">
-	</a><br>
-	<a href="/game/work/abort/{{ roach.id }}/" title="Уйти с работы и не получить ничего">Уйти с работы</a>
+	<a href="{% url work_abort roach.pk %}" title="Уйти с работы и не получить ничего">
+		<img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp">
+		<br>
+		Уйти с работы
+	</a>
 	{% else %}
-	<a href="/game/work/{{ roach.id }}/" title="Устроиться на работу и получить деньги">
-		<img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp">
-	</a><br>
-	<a href="/game/work/{{ roach.id }}/" title="Устроиться на работу и получить деньги">Батрачить</a>
+	<a href="{% url work roach.pk %}" title="Устроиться на работу и получить деньги">
+		<img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp">
+		<br>
+		Батрачить
+	</a>
 	{% endif %}
 </div>
 
 <div style="position:absolute; margin-left:380px;margin-top:50px; border:dotted;float:left;">
 	{% if train %}
-	<a href="/game/train/abort/{{ roach.id }}/" title="Уйти от тренера и не получить опыта">
-		<img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp">
-	</a><br>
-	<a href="/game/train/abort/{{ roach.id }}/" title="Уйти от тренера и не получить опыта">Покинуть тренеровку</a>
+	<a href="{% url train_abort roach.pk %}" title="Уйти от тренера и не получить опыта">
+		<img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp">
+		<br>
+		Покинуть тренеровку
+	</a>
 	{% else %}
-	<a href="/game/train/{{ roach.id }}/" title="Нанять тренера и получить опыт">
-		<img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp">
-	</a><br>
-	<a href="/game/train/{{ roach.id }}/" title="Нанять тренера и получить опыт">Нанять тренера</a>
+	<a href="{% url train roach.pk %}" title="Нанять тренера и получить опыт">
+		<img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp">
+		<br>
+		Нанять тренера
+	</a>
 	{% endif %}
 </div>
 
 <div style="position:absolute; margin-left:80px;margin-top:250px; border:dotted;float:left;">
-	<a href="/game/stat/{{ roach.id }}/" title="Рейтинги в мире тараканов"><img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp"></a>
+	<a href="/game/stat/{{ roach.pk }}/" title="Рейтинги в мире тараканов"><img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp"></a>
 	<br>
-	<a href="/game/stat/{{ roach.id }}/" title="Рейтинги в мире тараканов">Мы любим яйца</a>
+	<a href="/game/stat/{{ roach.pk }}/" title="Рейтинги в мире тараканов">Мы любим яйца</a>
 </div>
 
 <div style="position:absolute; margin-left:280px;margin-top:280px; border:dotted;float:left;">
-	<a href="/game/sale/{{ roach.id }}/" title="Где тут сникерсы продаються!?"><img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp"></a>
+	<a href="/game/sale/{{ roach.pk }}/" title="Где тут сникерсы продаються!?"><img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp"></a>
 	<br>
-	<a href="/game/sale/{{ roach.id }}/" title="Где тут сникерс купить можно!?">А есть че?</a>
+	<a href="/game/sale/{{ roach.pk }}/" title="Где тут сникерс купить можно!?">А есть че?</a>
 </div>
 <div style="position:absolute; margin-left:480px;margin-top:260px; border:dotted;float:left;">
-	<a href="/game/evolution/{{ roach.id }}/" title="туць туць"><img class="icon" src="/site_media/upload/avatar/Fireworks_1.bmp"></a>
+	<a href="/game/evolution/{{ roach.pk }}/" title="туць туць"><img class="icon" src="{{ STATIC_URL }}main/img/Fireworks_1.bmp"></a>
 	<br>
-	<a href="/game/evolution/{{ roach.id }}/" title="тыць тыць">Хачу стать круче</a>
+	<a href="/game/evolution/{{ roach.pk }}/" title="тыць тыць">Хачу стать круче</a>
 </div>
 {% endblock %}

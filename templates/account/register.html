@@ -1,0 +1,58 @@
+{% extends base %}
+
+{% block content %}
+    <div class="formenter" id="form-reg">
+        {% include "account/social-logins.html" %}
+        <div class="in">
+            <h4>Регистрация</h4>
+            После регистрации вы сможете заходить на сайт, используя &laquo;имя&nbsp;пользователя&raquo; и пароль.
+        </div>
+        <form method="post" action="{{ form_url }}">
+            {% csrf_token %}
+            <dl>
+                <dt class="in">Имя пользователя</dt>
+                <dd class="in">Адрес электронной почты</dd>
+                <dt>{{ form.username }}</dt>
+                <dd>{{ form.email }}</dd>
+                <dt class="in help">Это имя будет использоваться<br> для входа на сайт. Это имя<br> может содержать только<br> английские буквы, цифры и<br> подчёркивания.</dt>
+                <dd class="in help">Укажите реальный адрес<br> электронной почты.<br> По завершению регистрации, на<br> этот адрес придёт письмо<br> с инструкциями по активации<br> аккаунта.</dd>
+                <dt class="in">
+                    {% if form.username.errors %}
+                        {{ form.username.errors }}
+                    {% else %}&nbsp;{% endif %}
+                </dt>
+                <dd class="in">
+                    {% if form.email.errors %}
+                        {{ form.email.errors }}
+                    {% else %}&nbsp;
+                    {% endif %}
+                </dd>
+                <dt class="in">Пароль</dt>
+                <dd>Пароль еще раз</dd>
+                <dt>{{ form.password1 }}</dt>
+                <dd>{{ form.password2 }}</dd>
+                <dt class="in">
+                    {% if form.password1.errors %}
+                        {{ form.password1.errors }}
+                    {% else %}
+                        {% if form.password2.errors %}
+                            &nbsp;
+                        {% endif %}
+                    {% endif %}
+                </dt>
+                <dd class="in">
+                    {{ form.password2.errors }}
+                </dd>
+            </dl>
+            {% spaceless %}
+                {% if form.non_field_errors %}
+                    <div class="error">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+            {% endspaceless %}
+
+            <button type="submit">Продолжить</button>
+        </form>
+    </div>
+{% endblock %}

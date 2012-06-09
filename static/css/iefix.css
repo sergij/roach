@@ -1,0 +1,2 @@
+.site{min-width: 1125px; width:expression(document.body.clientWidth < 1125 ? "1125px": "auto" );}
+

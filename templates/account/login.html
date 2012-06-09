@@ -1,0 +1,48 @@
+{% extends base %}
+
+{% block content %}
+    <div class="formenter" id="form-login">
+        {% include "account/social-logins.html" %}
+        <div class="in">
+            <h4>Войти с помощью логина/пароля:</h4>
+        </div>
+
+        <form method="post" action="{{ form_url }}">
+            {% csrf_token %}
+            <dl>
+                <dt class="in">Имя пользователя (или email)</dt>
+                <dd class="in">Пароль</dd>
+
+                <dt>{{ form.username }}</dt>
+                <dd>{{ form.password }}</dd>
+
+                {% if form.username.errors or form.password.errors %}
+                    <dt>
+                        {% if form.username.errors %}{{ form.username.errors }}{% else %}&nbsp;{% endif %}
+                    </dt>
+                    <dd>
+                        {{ form.password.errors }}
+                    </dd>
+                {% endif %}
+            </dl>
+            
+            {% spaceless %}
+                {% if form.non_field_errors %}
+                    <div class="error">
+                        Неверный логин/пароль
+                    </div>
+                {% endif %}
+            {% endspaceless %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit">Войти</button>
+            
+        </form>
+
+        <div class="in secondary-text">
+            Забыли пароль
+            ? <a href="{% url account_password_reset %}" class="popup-open">Поможем восстановить.</a> <br>
+            Если вы не зарегистрированы можете это</br>
+            сделать <a class="popup-open" href="{% url account_register %}">прямо сейчас</a>.
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Подтверждение изменения адреса электронной почты</h1>
+
+<p>
+Спасибо за уделённое время. На ваш адрес электронной почты, 
+указанный на предыдущем этапе, отправлен 
+код подтверждения. Дождитесь письма с кодом 
+и введите присланный код в поле ниже или перейдите по ссылке в письме.
+</p>
+
+
+{% if form.non_field_errors %}
+<div class="error">
+    {{ form.non_field_errors }}
+</div>    
+{% endif %}
+
+<form action="">
+    <dl>
+        {% for field in form %}
+            <dt>{{ field.label_tag }}</dt>
+            <dd>{{ field }}
+                {% if field.help_text %}<div>{{ field.help_text }}</div>{% endif %}
+                {% if field.errors %}<div class="error">{{ field.errors }}</div>{% endif %}
+            </dd>
+        {% endfor %}
+    </dl>
+    <input type="submit" value="Продолжить">
+</form>
+
+{% endblock %}

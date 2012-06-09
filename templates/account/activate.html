@@ -1,0 +1,28 @@
+{% extends base %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+	<div class="formenter" id="activations">
+		<h4>Активация</h4>
+		<form method="get" action="{{ form_url }}">
+			<div class="regist">
+				<p>Дождитесь письма с кодом активации на адрес электронной почты, который Вы указали на предыдущем этапе.</p>
+				<p>Введите присланный код активации в поле ниже<br />или перейдите по ссылке в письме.</p>
+
+			    {% csrf_token %}
+
+			    {{ form.non_field_errors }}
+
+			    {{ form.activation_key.label_tag }}
+			    {{ form.activation_key|add_class:"text"  }}
+			    {{ form.activation_key.errors }}
+				<br>
+				<br>
+                <button type="submit">Продолжить</button>
+			</div>
+		</form>
+	</div>
+
+
+{% endblock %}

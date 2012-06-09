@@ -1,0 +1,138 @@
+body,input,textarea,select{font-size:13px; font-family: Arial, sans-serif;}
+body{width:100%;color:#333;padding:0;margin:0;background:#fff;}
+table{border-collapse:collapse;padding:0;}
+td{margin:0;padding:0;}
+form{margin:0;padding:0}
+
+a img{border:0}
+a {color: #333;}
+a:hover {color:#60ccf3;}
+
+html, body{height:100%;}
+
+ul.errorlist {margin:0; padding:0}
+ul.errorlist li {list-style:none; padding:3px 0 0 30px; min-height: 20px; color:#d01f26; margin: 6px 0 0 0; }
+
+body {
+	font-size:75%;
+	font-family:verdana,arial,'sans serif';
+	background-repeat:repeat-x;
+	color:#000080;
+  	padding: 0;
+  	margin: 0;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#total {
+	padding: 0;
+  	margin: 0;
+	width: 806px;
+	height: 600px;
+	border: dashed;
+	background-color:#ebff67;
+	"background-image: url('/site_media/upload/back.jpg');"
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#menu {
+	font-size:100%;
+	font-family:verdana,arial,'sans serif';
+  	padding: 0;
+  	margin: 0;
+  	width: 800px;
+  	height: 35px;
+  	border: inset;
+  	text-align: center;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#user_cont {
+	float: left;
+	padding: 0;
+	margin: 0;
+	width: 175px;
+	border: inset;
+	border-color:#376c38;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#log {
+	float: left;
+	padding: 0;
+	margin: 0;
+	margin-left: 0px;
+	width: 450px;
+	border: inset;
+	height:400px;
+	overflow-y:scroll;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#result {
+	float: left;
+	padding: 0;
+	margin-top: 0px;
+	margin-left: 0px;
+	border: inset;
+	width: 450px;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#oppon_cont {
+	position: absolute;
+	padding: 0;
+	margin: 0;
+	margin-left: 450px;
+	width: 175px;
+	border: inset;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+#main_cont {
+	margin-left: 180px;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+.error {
+	color:red;
+}
+.avatar {
+	width: 165px;
+	height: 220px;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+
+.icon {
+	width: 108px;
+	height: 108px;
+	
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+}
+#round {
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+	background: #adadad;
+}
+
+a: link {color: #b2bbff;}
+a: hover {color: #b2bbff;}
+a: active {color: #b2bbff;}
+a:visited {color: #b2bbff;}

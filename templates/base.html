@@ -1,19 +1,26 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html>
+﻿<!DOCTYPE html>
+<html lang="ru">
 <head>
-<link rel="stylesheet" href="/site_media/css/style_base.css" type="text/css">
-    <title>{% block title %}{% endblock %}</title>
-</head>
-<body style='background:#e8e6e6;'>
-{% block content %}{% endblock %}
-<table>
-<tr>
-<td>
-
-</td>
-</tr>
-</table>
-    {% block footer %}
+    <title>{% block page_title %}Тараканьи бега{% endblock %}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}main/css/style.css" />
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}main/css/iefix.css" />
+    <![endif]-->
+    {% block extra_head %}
     {% endblock %}
+</head>
+
+<body>
+<div class="site">
+    <div class="head">
+    {% block menu %}
+    {% endblock %}
+	</div>
+	<div class="content">
+    {% block content %}
+    {% endblock %}
+	</div>
+</div>
 </body>
 </html>
