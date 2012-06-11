@@ -20,7 +20,7 @@ from django.utils.http import base36_to_int
 from forms import ActivationForm, EmailChangeValidationForm
 from lib.utils import AjaxFormResponse, SuccessAjaxFormResponse, render_template
 from lib.json import model_to_dict, JsonResponse
-from extauth.utils import get_backend as get_extauth_backend
+
 from models import ChangeEmailRequest
 
 DEFAULT_ACTIVATE_REDIRECT_URL = '/'
@@ -45,9 +45,7 @@ def login(request):
 
         if request.is_ajax():
             user_dict = model_to_dict(user, exclude=['password'])
-            backend = get_extauth_backend()
-            ticket = backend.make_ticket(request.user)
-            data = [user_dict, {'ticket': ticket}]
+            data = [user_dict]
             if next_page: data[1].update({'next_url': next_page})
             return SuccessAjaxFormResponse(request,
                                            type='loggedIn', data=data)
@@ -91,7 +89,8 @@ def register(request):
     if form.is_valid():
         reg_backend = RegistrationBackend()
         reg_backend.register(request, **form.cleaned_data)
-        return redirect('account_activate')
+        next_page = request.GET.get(REDIRECT_FIELD_NAME, 'account_activate')
+        return redirect(next_page)
 
     if request.is_ajax():
         return render_popup(request, 'account/register.html', {

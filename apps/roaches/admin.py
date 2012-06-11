@@ -1,10 +1,10 @@
 from django.contrib import admin
-from main.models import Base_skill_type, Level, Status, Artefact, Box, Roach, RaceRoad, Race, Point, Harm, RuningLog, Avatar, ResultDroped, EvolutionPrice
+from roaches.models import BaseSkillType, Level, Status, Garment, Box, Roach, RaceRoad, Race, Point, Harm, RuningLog, Avatar, ResultDroped, EvolutionPrice
 
-admin.site.register(Base_skill_type)
+admin.site.register(BaseSkillType)
 admin.site.register(Level)
 admin.site.register(Status)
-admin.site.register(Artefact)
+admin.site.register(Garment)
 admin.site.register(Box)
 admin.site.register(Race)
 admin.site.register(RaceRoad)

@@ -1,19 +1,31 @@
-from django.conf.urls.defaults import *
-
+# -*- coding: utf-8 -*-
+from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
-admin.autodiscover()
-import settings
-from views import home_page, delete_races
-urlpatterns = patterns('',
-    # (r'^roach/', include('roach.foo.urls')),
+from django.conf import settings
+from django.views.generic.simple import direct_to_template
+from django.views.decorators.csrf import csrf_exempt
+from social_auth.views import complete
 
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    (r'^$', home_page),
-    (r'^delete_race/$', delete_races),
-    (r'^accounts/', include('roach.register.urls')),
-    (r'^game/', include('roach.main.urls')),
-    (r'^admin/', include(admin.site.urls)),
-    (r'^site_media/(?P<path>.*)$', 'django.views.static.serve', 
-        {'document_root': settings.MEDIA_ROOT}),
+
+admin.autodiscover()
+    
+urlpatterns = patterns('',
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^grappelli/', include('grappelli.urls')),
+    url(r'^admin/filebrowser/', include('filebrowser.urls')),
+    url(r'^account/', include('account.urls')),
+    url(r'^racing/', include('roaches.urls')),
+)
+
+urlpatterns += patterns('',
+    url(r'^$', 'roaches.views.index', name='index'),
+)
+
+urlpatterns += patterns('roaches.views',
+)
+
+urlpatterns += patterns('',
+    url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
+        'document_root': settings.MEDIA_ROOT,
+    }),
 )

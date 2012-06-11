@@ -24,4 +24,5 @@ pip-log.txt
 *.mo
 
 #Mr Developer
+README.md
 .mr.developer.cfg

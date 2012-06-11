@@ -7,6 +7,5 @@ django-debug-toolbar>=0.8.4
 -e hg+https://bitbucket.org/ubernostrum/django-registration#egg=django_registration
 -e git+https://github.com/zakhar/sorl-thumbnail.git#egg=sorl_thumbnail
 #django_compressor
--e hg+https://bitbucket.org/russmo/django-storages-multi#egg=django-storages-multi
-#django-storages
+#-e hg+https://bitbucket.org/russmo/django-storages-multi#egg=django-storages-multi
 boto

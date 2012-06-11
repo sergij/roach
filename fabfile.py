@@ -9,7 +9,13 @@ def development():
     env.user = 'serk'
     env.hosts = ['174.133.21.90']
 
+def alwaysdata():
+    env.stage = 'development'
+    env.user = 'roach'
+    env.hosts = ['ssh.alwaysdata.com']
+
 dev = development
+alw = alwaysdata
 
 @runs_once
 def pack():
@@ -19,13 +25,17 @@ def pack():
 
 def putcode():
     release_dir = 'releases/%s' % env.datetag
+    src_dir = 'src'
     with path('~'):
         put('/tmp/%s' % env.packed_filename, 'tmp/')
-        run('mkdir -p %s' % release_dir)
-        with cd('%s' % release_dir):
+        # run('mkdir -p %s' % release_dir)
+        # with cd('%s' % release_dir):
+        #     run('tar -xzf ~/tmp/%s' % env.packed_filename)
+        with cd('%s' % src_dir):
             run('tar -xzf ~/tmp/%s' % env.packed_filename)
         run('rm ~/tmp/%s' % env.packed_filename)
-    run('ln -sfT ~/%s/ ~/src' % release_dir)
+    local("rm /tmp/%s" % env.packed_filename)
+    # run('ln -sfT ~/%s/ ~/src' % release_dir)
 
 
 def update_pip():
@@ -34,7 +44,7 @@ def update_pip():
         run('pip install -r ~/src/deploy/%s/requirements.txt' % (env.stage))
 
 def configure_project():
-    run('cp ~/conf/local_settings.py ~/src/')
+    run('cp ~/conf/local_settings.py ~/src')
 
 def setup_project():
     configure_project()
@@ -63,5 +73,5 @@ def deploy():
     # reload_server()
 
 def make_dirs():
-    run('mkdir -p ~/{static,log,conf}')
+    run('mkdir -p ~/{static,log}')
 

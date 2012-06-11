@@ -1,39 +1,20 @@
 # -*- coding: utf-8 -*-
 from django.core.context_processors import request
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-#from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required
-#from django.contrib.auth.admin import User
-from django.views.decorators.csrf import csrf_protect
-from django.template import RequestContext
-from django import forms
-
-from roach.main.models import Base_skill_type, Level, Status, Artefact, Box, Roach, RaceRoad, Race, Point, Harm, RuningLog, Avatar
+from django.shortcuts import  render, redirect, get_object_or_404
+from roaches.models import BaseSkillType, Level, Status, Box, Roach, RaceRoad, Race, Point, Harm, Avatar
 
 import datetime
 import random
+from roaches.forms import DaysForm
 
-
-from main.models import Race
-
-class DaysForm(forms.Form):
-    #days = forms.Text(label=u"Период в днях")
-    pass
-    
-@csrf_protect
-def home_page(request):
+def index(request):
     form = DaysForm()
-    return render_to_response('index.html',{'user':request.user,'form':form, }, 
-                               context_instance=RequestContext(request))
+    return render(request, 'index.html', {'form': form})
 
-@csrf_protect
 @login_required
 def delete_races(request):
-    """
-    Производим удаление устарелых гонок,
-    за указаный период request.POST['days']
-    """
     if request.method == 'POST':
         if request.user.is_superuser:
             d = datetime.timedelta(days = int(request.POST['days']))
@@ -43,27 +24,9 @@ def delete_races(request):
                 new_date = date.date + d
                 Race.objects.filter(date__lt=new_date).delete()
             except: pass
-        return render_to_response('index.html',{'user':request.user, }, 
-                               context_instance=RequestContext(request))
-    return render_to_response('index.html',{'user':request.user, }, 
-                               context_instance=RequestContext(request))
+        return render(request, 'index.html', {})
+    return render(request, 'index.html', {})
 
-class WorkingForm(forms.Form):
-    hours = forms.ChoiceField(label=u"Сколько часов собираешся проработать?",choices = ([('1','1 час'), ('2','2 часа'), ('3','3 часa'),('4','4 часa'),('5','5 часов'),('6','6 часов'),('7','7 часов'),('8','8 часов'),]), initial='1',)
-
-class TrainingForm(forms.Form):
-    hours = forms.ChoiceField(label=u"Сколько часов собираешся пропотеть?",choices = ([('1','1 час'), ('2','2 часа'), ('3','3 часa'),('4','4 часa'),('5','5 часов'),('6','6 часов'),('7','7 часов'),('8','8 часов'),]), initial='1',)
-
-class RoachForm(forms.ModelForm):
-    sex = forms.ChoiceField(label=u'Пол таракана',choices = ([('1','Mуж.'), ('0','Жен.'), ]), initial='1',)
-    base_skill_type = forms.ModelChoiceField(label=u'Специализация таракана',queryset=Base_skill_type.objects.all(),initial='1') 
-    class Meta:
-        model = Roach
-        fields = ('roach_name',)
-    
-class ChooseOpponent(forms.Form):
-    level = forms.ModelChoiceField(label=u'Сила противника',queryset=Level.objects.all(), initial='0',)
-        
 def get_roach(out_id):
     try: roach = Roach.objects.get(out_id = out_id)
     except Roach.DoesNotExist:
@@ -71,26 +34,9 @@ def get_roach(out_id):
         except Roach.DoesNotExist: return None
     return roach
 
-def regenerate_roach(roach):
-    """
-    Функция регенерации жизни таракана
-    """
-    if roach.power < roach.level.max_power:
-        time = roach.regenerate_time
-        delta = datetime.datetime.now() - time
-        roach.regenerate_time = datetime.datetime.now()
-        if delta.days>0:
-            roach.power+=(float(roach.level.max_power)/60)*(delta.days*24*60)
-        roach.power+=int((float(roach.level.max_power)/60)*delta.seconds/60)
-        if roach.power > roach.level.max_power:
-            roach.power = roach.level.max_power
-            roach.save()
-        roach.save()
+
 
 def what_are_doing(roach):
-    """
-    Определяет чем же таки занят таракан в даный момент времени
-    """
     time = roach.end_time_status
     d = time - datetime.datetime.now()
     hours = d.seconds/3600
@@ -99,67 +45,51 @@ def what_are_doing(roach):
     #stat_time.append({'hours': hours})
     #stat_time.append({})
     #stat_time.append({})
-    if roach.status == Status.objects.get(status_name = "work"):
+    if roach.status == Status.objects.get(pk=1):
         stat_time.append({'mes': u"Вы сейчас на работе", 'val': "work"})
         #stat_time.append({})
         return stat_time
-    elif roach.status == Status.objects.get(status_name = "train"):
+    elif roach.status == Status.objects.get(pk=2):
         stat_time.append({'mes': u"Вы сейчас на репетиции балета", 'val': "train"})
         #stat_time.append({})
         return stat_time
     return stat_time
     
-@csrf_protect
 @login_required
-def game_main(request):
-    """
-    Переводит юзера в Игру
-    """
-    roach = get_roach(out_id = request.user.id)
-    if roach is None:
-        return create_roach(request)
-    #Проверка свободен ли сейчас таракан
-    #if roach.status == Status.objects.get(status_name = "free"):
-    regenerate_roach(roach)
-    if roach.status == Status.objects.get(status_name = "work"):
+def game(request):
+    roach = Roach.for_user(request.user)
+    roach.regenerate_roach()
+    if roach.status.status == 1:
         time = roach.end_time_status
         if time < datetime.datetime.now():
-            roach.status = Status.objects.get(status_name = "free")
+            roach.status = Status.objects.get(pk=0)
             roach.money_2 += roach.temp_money
             roach.temp_money = 0
             roach.save()
-            return render_to_response('main/main.html',{'user':request.user, 'roach':roach}, 
-                               context_instance=RequestContext(request))
+            return render(request, 'roaches/main.html', {'roach': roach})
         d = time - datetime.datetime.now()
         hours = d.seconds/3600
         minutes = (d.seconds%3600)/60
         seconds = d.seconds-minutes*60-hours*3600
-        return render_to_response('main/main.html',{'user':request.user, 'roach':roach,'work':True, 'hours': hours, 'minutes':minutes, 'seconds':seconds}, 
-                               context_instance=RequestContext(request))
-    elif roach.status == Status.objects.get(status_name = "train"):
+        return render(request, 'roaches/main.html',
+            {'roach':roach,'work':True, 'hours': hours, 'minutes':minutes, 'seconds':seconds})
+    elif roach.status.status == 1:
         time = roach.end_time_status
         if time < datetime.datetime.now():
-            roach.status = Status.objects.get(status_name = "free")
+            roach.status = Status.objects.get(pk=0)
             roach.exp_now += roach.temp_money
             roach.temp_money = 0
             roach.save()
-            return render_to_response('main/main.html',{'user':request.user, 'roach':roach}, 
-                               context_instance=RequestContext(request))
+            return render(request, 'roaches/main.html', {'roach': roach})
         d = time - datetime.datetime.now()
         hours = d.seconds/3600
         minutes = (d.seconds%3600)/60
         seconds = d.seconds-minutes*60-hours*3600
-        return render_to_response('main/main.html',{'user':request.user, 'roach':roach,'train':True, 'hours': hours, 'minutes':minutes, 'seconds':seconds}, 
-                               context_instance=RequestContext(request))
-    return render_to_response('main/main.html',{'user':request.user, 'roach':roach}, 
-                               context_instance=RequestContext(request))
+        return render(request, 'roaches/main.html', {'roach': roach, 'train': True, 'hours': hours, 'minutes':minutes, 'seconds':seconds})
+    return render(request, 'roaches/main.html',{'roach':roach})
 
-@csrf_protect
 @login_required
 def create_roach(request):
-    """
-    Создание таракана юзеру
-    """
     error = None
     form = RoachForm(request.POST or None)
     if form.is_valid():
@@ -173,7 +103,7 @@ def create_roach(request):
                 roach.out_id = request.user.id
                 roach.sex = request.POST['sex']
                 #if request.POST['base_skill_type']=="0":
-                roach_skill = Base_skill_type.objects.get(id = request.POST['base_skill_type'])
+                roach_skill = BaseSkillType.objects.get(id = request.POST['base_skill_type'])
                 roach.avatar = Avatar.objects.get(male=request.POST['sex'], skill=roach_skill)
                 roach.box = box
                 roach.status = Status.objects.get(status_name="free")
@@ -181,18 +111,12 @@ def create_roach(request):
                 roach.save()
                 return HttpResponseRedirect('/game/')
             error = u"""У вас уже есть один таракан!"""
-            return render_to_response('main/create_roach.html',{'errors':error, 'user':request.user, 'form':form}, 
-                               context_instance=RequestContext(request))
+            return render(request, 'roaches/create_roach.html',{'errors':error, 'form':form})
         error = u"Таракан с именем %s уже существует"%request.POST['roach_name']
-    return render_to_response('main/create_roach.html',{'errors':error, 'user':request.user, 'form':form}, 
-                               context_instance=RequestContext(request))
+    return render(request, 'roaches/create_roach.html',{'errors':error, 'form':form})
     
-@csrf_protect
 @login_required
 def choose_opponent(request, roach_id):
-    """
-    Создание гонки
-    """
     error = None
     if request.method == 'POST':
         roach = Roach.objects.get(id = request.POST['id'])
@@ -201,37 +125,25 @@ def choose_opponent(request, roach_id):
             opponent = roaches[random.randint(0,len(roaches)-1)]
             if opponent.power < (opponent.level.max_power/2): regenerate_roach(opponent)
             if opponent.power > (opponent.level.max_power/2): break
-        return render_to_response('main/race_manager.html',{'error':error,'opponent':opponent, 'roach':roach}, 
-                                  context_instance=RequestContext(request))
+        return render(request, 'roaches/race_manager.html',{'error':error,'opponent':opponent, 'roach':roach})
     else:
         roach = Roach.objects.get(id = roach_id)
-        '''Блок проверок на возможность проведения поединка'''
         if roach.power < (roach.level.max_power/2):
             error = u"Ты ещё не отошел от предыдущей гонки."
-            return render_to_response('main/main.html',{'error':error, 'user':request.user, 'roach':roach}, 
-                                    context_instance=RequestContext(request))
+            return render(request, 'roaches/main.html',{'error':error, 'roach':roach})
         elif roach.status == Status.objects.get(status_name = "free"):
             while True:
                 roaches = Roach.objects.all().exclude(id = roach.id)
                 opponent = roaches[random.randint(0,len(roaches)-1)]
                 if opponent.power < (opponent.level.max_power/2): regenerate_roach(opponent)
                 if opponent.power > (opponent.level.max_power/2): break
-            return render_to_response('main/race_manager.html',{'errors':error,'opponent':opponent, 'roach':roach},
-                                       context_instance=RequestContext(request))
+            return render(request, 'roaches/race_manager.html', {'errors':error,'opponent':opponent, 'roach':roach})
         else:
             temp = what_are_doing(roach)
-            return render_to_response('main/main.html',{'error':temp[1]['mes'],'user':request.user, 'roach':roach,temp[1]['val']: True, 
-                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']}, 
-                                                    context_instance=RequestContext(request))
+            return render(request, 'roaches/main.html', {'error':temp[1]['mes'], 'roach':roach,temp[1]['val']: True, 
+                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']})
 
 def clars(roach_1, roach_2):
-    """
-    Создание лога гонки по двум заданым тараканам
-    Трасса(точки) - для менее сильного
-    carma_<ID> - результат гонки для каждого таракана
-    чем больше тем лучше
-    pen_<ID> - пенальти за каждую точку (больше-лучше)
-    """
     level = min(roach_1.level.level, roach_2.level.level)
     points = Point.objects.filter(race_road = RaceRoad.objects.get(level = level))
     carma_1 = 0
@@ -277,7 +189,6 @@ def clars(roach_1, roach_2):
         log.append({0:text.text.replace('roach',roach_1.roach_name)})
         carma_1 += pen_1
         carma_2 += pen_2
-    from roach.main.models import ResultDroped
     if carma_1 >= carma_2:
         winner = roach_1
         diff = roach_2.level.level - roach_1.level.level
@@ -306,28 +217,19 @@ def clars(roach_1, roach_2):
     race.roaches.add(roach_1,roach_2)
     return race.id
 
-@csrf_protect
+
 @login_required
 def create_race(request):
-    """
-    Создание гонки GET - запрос не расматриваеться,
-    все выбирается в  /compete/
-    """
     if request.method == 'POST':
         roach_1 = Roach.objects.get(id = request.POST['my_id'])
         roach_2 = Roach.objects.get(id = request.POST['id'])
         race_id = clars(roach_1, roach_2)
-        #print log[0]["winner"]
-        #return render_to_response('main/race_result.html',{'roach':roach_1, 'winner':log[0]["winner"], 'opponent':roach_2, 'log':log[1]['log']}, context_instance=RequestContext(request))
         return view_race(request, race_id, roach_1.id)
     return HttpResponseRedirect('/game/')
 
-@csrf_protect
+
 @login_required
 def work_for_food(request, roach_id):
-    """
-    Устраиваем таракана на работу
-    """
     roach = Roach.objects.get(id = roach_id)
     form = WorkingForm(request.POST or None)
     if roach.status == Status.objects.get(status_name = "free"):
@@ -342,27 +244,20 @@ def work_for_food(request, roach_id):
     else:
         temp = what_are_doing(roach)
         #print temp
-        return render_to_response('main/main.html',{'error':temp[1]['mes'],'user':request.user, 'roach':roach,temp[1]['val']: True, 
-                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']}, 
-                                                    context_instance=RequestContext(request))
-    return render_to_response('main/work.html',{'roach':roach,'form':form}, context_instance=RequestContext(request))
+        return render(request, 'main/main.html',{'error':temp[1]['mes'], 'roach':roach,temp[1]['val']: True, 
+                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']})
+    return render(request, 'main/work.html', {'roach':roach,'form':form})
 
-@csrf_protect
 @login_required
 def work_abort(request, roach_id):
     roach = Roach.objects.get(id = roach_id)
     roach.status = Status.objects.get(status_name = "free")
     roach.temp_money = 0
     roach.save()
-    return render_to_response('main/main.html',{'user':request.user, 'roach':roach}, 
-                                      context_instance=RequestContext(request))
+    return render(request, 'main/main.html',{'roach':roach})
     
-@csrf_protect
 @login_required
 def train(request, roach_id):
-    """
-    Отдаем таракана тренеру
-    """
     roach = Roach.objects.get(id = roach_id)
     form = TrainingForm(request.POST or None)
     if roach.status == Status.objects.get(status_name = "free"):
@@ -378,12 +273,10 @@ def train(request, roach_id):
     else:
         temp = what_are_doing(roach)
         #print temp
-        return render_to_response('main/main.html',{'error':temp[1]['mes'],'user':request.user, 'roach':roach,temp[1]['val']: True, 
-                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']}, 
-                                                    context_instance=RequestContext(request))
-    return render_to_response('main/train.html',{'roach':roach,'form':form}, context_instance=RequestContext(request))
+        return render(request, 'main/main.html',{'error':temp[1]['mes'], 'roach':roach,temp[1]['val']: True, 
+                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']})
+    return render(request, 'main/train.html', {'roach':roach,'form':form})
 
-@csrf_protect
 @login_required
 def train_abort(request, roach_id):
     """
@@ -400,9 +293,7 @@ def train_abort(request, roach_id):
     roach.exp_now += (koef-hours)*roach.level.price_for_work
     roach.temp_money = 0
     roach.save()
-    return render_to_response('main/main.html',{'user':request.user, 'roach':roach}, 
-                                      context_instance=RequestContext(request))
-@csrf_protect
+    return render(request, 'roaches/main.html',{'roach':roach})
 @login_required 
 def view_race(request, race_id, roach_id):
     #print log[0]["winner"]
@@ -412,19 +303,15 @@ def view_race(request, race_id, roach_id):
     prize = race.prize
     roach_2 = race.roaches.all().exclude(id = roach.id)[0]
     exec(compile('log='+race.log, '<string>', 'exec'))
-    return render_to_response('main/race_result.html',{'roach':roach, 'prize':prize, 'winner':winner, 'opponent':roach_2, 'log':log}, context_instance=RequestContext(request))
+    return render(request, 'roaches/race_result.html',{'roach':roach, 'prize':prize, 'winner':winner, 'opponent':roach_2, 'log':log})
 
-@csrf_protect
 @login_required 
 def view_stats(request, roach_id):
-    #print log[0]["winner"]
     roach = Roach.objects.get(id = roach_id)
     roaches = Roach.objects.order_by('-exp_all')[:5]
-    return render_to_response('main/stat.html',{'roach':roach, 'roaches':roaches,}, context_instance=RequestContext(request))
+    return render(request, 'roaches/stat.html',{'roach':roach, 'roaches':roaches})
 
-@csrf_protect
 @login_required 
 def evolution(request, roach_id):
-    #print log[0]["winner"]
     roach = Roach.objects.get(id = roach_id)
-    return render_to_response('main/evolution.html',{'roach':roach,}, context_instance=RequestContext(request))
+    return render(request, 'roaches/evolution.html',{'roach':roach})
