@@ -106,7 +106,6 @@ INSTALLED_APPS = (
     'social_auth',
     'sorl.thumbnail',
     # 'compressor',
-    'storages',
     'account',
     'roaches',
 )
