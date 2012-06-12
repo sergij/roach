@@ -88,8 +88,10 @@ def register(request):
     form = RegistrationFormUniqueEmail(request.POST or None)
     if form.is_valid():
         reg_backend = RegistrationBackend()
-        reg_backend.register(request, **form.cleaned_data)
-        next_page = request.GET.get(REDIRECT_FIELD_NAME, 'account_activate')
+        user = reg_backend.register(request, **form.cleaned_data)
+        user.is_active = True
+        user.save()
+        next_page = request.GET.get(REDIRECT_FIELD_NAME, 'account_login')
         return redirect(next_page)
 
     if request.is_ajax():

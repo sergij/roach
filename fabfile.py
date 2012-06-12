@@ -73,5 +73,5 @@ def deploy():
     # reload_server()
 
 def make_dirs():
-    run('mkdir -p ~/{static,log}')
+    run('mkdir -p ~/{static,log,env}')
 

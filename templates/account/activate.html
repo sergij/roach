@@ -1,5 +1,4 @@
 {% extends base %}
-{% load widget_tweaks %}
 
 {% block content %}
 
@@ -15,7 +14,7 @@
 			    {{ form.non_field_errors }}
 
 			    {{ form.activation_key.label_tag }}
-			    {{ form.activation_key|add_class:"text"  }}
+			    {{ form.activation_key  }}
 			    {{ form.activation_key.errors }}
 				<br>
 				<br>
