@@ -1,5 +1,5 @@
 *.py[co]
-
+local_settings.py
 # Packages
 *.egg
 *.egg-info
