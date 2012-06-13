@@ -136,3 +136,30 @@ a: link {color: #b2bbff;}
 a: hover {color: #b2bbff;}
 a: active {color: #b2bbff;}
 a:visited {color: #b2bbff;}
+
+.formenter {font-size:0.9em; line-height: 140%; color:#000; display:block; border: 12px solid #ebebeb; background: #fff; width: 400px !important; padding: 20px;}
+.formenter button {background: #000; color:#fff;  border: 0; font-size: 1.2em; padding:5px 10px; margin:0}
+.formenter button:hover, button.hover {background: #b2bbff !important;}
+.formenter input {font-size: 1.08em;}
+.formenter dl{margin:0; padding:0; width:100%; overflow:hidden;}
+.formenter dt{width:200px; float:left;}
+.formenter dd{margin:0; width:180px; float:left;}
+.formenter dl input{border:1px solid #000; width:160px; padding:5px; font-size:1.25em; margin:2px 0 0 0;}
+.formenter .input-act{width:260px; border:1px solid #000; padding:5px; font-size:1.25em; margin:2px 0 15px 0;}
+.formenter .input-act2{width:380px;}
+.formenter .error{height:23px; margin:12px 0 10px 0; background:url(../img/war.gif) no-repeat; padding:0 0 0 35px; color:#d01f26; line-height:23px;}
+.formenter .error2{line-height:14px; margin:0 0 15px 0; background:url(../img/war.gif) 0 2px no-repeat; padding:0 0 4px 35px;}
+.formenter .in{padding:0 10px;}
+.formenter dd.in, .formenter dt.in {width: 180px;}
+
+.formenter .b-enter{padding:0 0 7px 0;}
+.formenter .b-enter img{border:0;}
+.formenter a{text-decoration: underline; color: #333;}
+.formenter a:hover{color:#b2bbff;}
+.formenter .help {color:#777; font-size:0.9em; line-height: 130%; padding-top: 3px;}
+
+.formenter .sp-text{color:#777777; font-size:0.93em; padding:5px 0 10px 10px;}
+
+.formenter h3 {font-size:1.4em;}
+.formenter label {border: 0; margin: 0; display: block; color: #666; font-weight: bold;}
+.formenter ul {list-style-type: none;}
