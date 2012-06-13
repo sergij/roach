@@ -21,9 +21,6 @@ urlpatterns += patterns('',
     url(r'^$', 'roaches.views.index', name='index'),
 )
 
-urlpatterns += patterns('roaches.views',
-)
-
 urlpatterns += patterns('',
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT,

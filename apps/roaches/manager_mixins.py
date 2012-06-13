@@ -15,3 +15,7 @@ class DeletedMixin(object):
 
     def undeleted(qs):
         return qs.filter(deleted=False)
+
+class FreeMixin(object):
+    def freenow(qs):
+        return qs.filter(status__status=0)

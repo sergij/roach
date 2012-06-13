@@ -36,20 +36,10 @@ SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
 
-if 'nfs' in PROJECT_ROOT:
-    MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'public/media')
-    STATIC_ROOT = os.path.join(PROJECT_ROOT, 'public/static')
-else:
-    MEDIA_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), 'media')
-    STATIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), 'static')
-
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'grappelli/'
-
-if 'nfs' in PROJECT_ROOT: PREFIX = 'public/'
-else: PREFIX = ''
 
 STATICFILES_DIRS = (
     ('main', os.path.join(PROJECT_ROOT, 'static')),
@@ -123,13 +113,13 @@ INSTALLED_APPS = (
 #     DEBUG_TOOLBAR_CONFIG = {
 #         'INTERCEPT_REDIRECTS': False
 #     }
-FILEBROWSER_MEDIA_ROOT = MEDIA_ROOT
+
 FILEBROWSER_MEDIA_URL = MEDIA_URL
-FILEBROWSER_DIRECTORY = 'public/files/'
+FILEBROWSER_DIRECTORY = 'files/'
 
 GRAPPELLI_ADMIN_TITLE = 'Racing cockroaches'
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/racing/'
 LOGIN_URL = '/account/login/'
 LOGOUT_URL = '/account/logout/'
 

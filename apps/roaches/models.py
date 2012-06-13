@@ -10,19 +10,14 @@ from django.db import models, transaction
 from django.contrib.auth.models import User
 
 from django.utils.translation import ugettext_lazy as _
-from django.core.files.base import ContentFile
-from django.db.models.signals import m2m_changed, post_save
 from django.core.validators import MinValueValidator, RegexValidator
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import mail_admins
-
-from sorl.thumbnail import get_thumbnail
 
 from lib.fields import AutoOneToOneField
 from lib.absmodels import TimestampedMixin, IndexedTimestampedMixin, TitledMixin, IndexedTimestampedSkipModifiedMixin
 from lib.manager import manager_from
 
-from manager_mixins import PublishedMixin, DeletedMixin
+from manager_mixins import PublishedMixin, DeletedMixin, FreeMixin
 
 def get_uuid_name_generator(prefix=''):
     import uuid
@@ -112,6 +107,7 @@ class Roach(models.Model):
     end_time_premium = models.DateTimeField(auto_now_add=True)
     is_banned = models.BooleanField(default = False)
 
+    objects = manager_from(FreeMixin)
     @staticmethod
     def for_user(user):
         try:
@@ -123,10 +119,13 @@ class Roach(models.Model):
                 level = Level.objects.create(level=1, title=u'Начинающий')
             try:
                 status = Status.objects.get(pk=0)
-            except:
+            except Status.DoesNotExist:
                 status = Status.objects.create(status=0)
+            try:
+                avatar = Avatar.objects.get(id=0)
+            except Avatar.DoesNotExist: pass
             new_box = Box.objects.create()
-            return Roach.objects.create(user=user, box=new_box, level=level, status=status)
+            return Roach.objects.create(nick=user.username, user=user, box=new_box, level=level, status=status, avatar=avatar)
 
     def __unicode__(self):
         return u'{0}, владелец: {1}'.format(self.nick if self.nick else self.user, self.user.username)
@@ -152,15 +151,15 @@ class RaceRoad(models.Model):
     road_name = models.CharField(_(u"Название трассы"), max_length = 100)
     img = models.ImageField(_(u"Картинка трассы"), upload_to=get_uuid_name_generator('road'))
     level = models.ForeignKey(Level)
-    points = models.IntegerField(default = 10)
+    points = models.ManyToManyField('Point', related_name='raceroads')
     def __unicode__(self):
         return (self.road_name + ' ' + self.level.level_name)
     class Meta:
+        ordering = ['level']
         verbose_name = _(u'Гоночная трасса')
         verbose_name_plural = _(u'Гоночные трассы')
 
 class Point(models.Model):
-    race_road = models.ForeignKey(RaceRoad)
     position = models.IntegerField(default = 1)
     pow_skill = models.IntegerField(default = 0)
     speed_skill = models.IntegerField(default = 0)

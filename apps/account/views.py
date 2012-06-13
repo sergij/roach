@@ -39,18 +39,7 @@ def login(request):
         user = form.get_user()
         auth.login(request, user)
         next_page = request.POST.get(REDIRECT_FIELD_NAME, '')
-
-        if not request.POST.get('remember_me', None):
-            request.session.set_expiry(0)
-
-        if request.is_ajax():
-            user_dict = model_to_dict(user, exclude=['password'])
-            data = [user_dict]
-            if next_page: data[1].update({'next_url': next_page})
-            return SuccessAjaxFormResponse(request,
-                                           type='loggedIn', data=data)
-        else:
-            return redirect(next_page or settings.LOGIN_REDIRECT_URL)
+        return redirect(next_page or settings.LOGIN_REDIRECT_URL)
 
     if request.is_ajax():
         context = {
@@ -88,10 +77,13 @@ def register(request):
     form = RegistrationFormUniqueEmail(request.POST or None)
     if form.is_valid():
         reg_backend = RegistrationBackend()
-        user = reg_backend.register(request, **form.cleaned_data)
-        user.is_active = True
-        user.save()
-        next_page = request.GET.get(REDIRECT_FIELD_NAME, 'account_login')
+        new_user = reg_backend.register(request, **form.cleaned_data)
+        new_user.is_active = True
+        new_user.save()
+        # login
+        new_user.backend='django.contrib.auth.backends.ModelBackend'
+        auth.login(request, new_user)
+        next_page = request.GET.get(REDIRECT_FIELD_NAME, settings.LOGIN_REDIRECT_URL)
         return redirect(next_page)
 
     if request.is_ajax():

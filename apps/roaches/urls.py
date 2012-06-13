@@ -4,9 +4,8 @@ from django.conf.urls.defaults import patterns, url
 from roaches.views import choose_opponent
 
 urlpatterns = patterns('roaches.views',
-    url(r'$', 'game', name='index_game'),
-    url(r'^create_roach/$', 'create_roach', name='create_roach'),
-    url(r'^compete/(?P<roach_id>\d+)/$', choose_opponent, name='compete'),
+    url(r'^$', 'game', name='index_game'),
+    url(r'^compete/$', choose_opponent, name='compete'),
     url(r'^create_race/$', 'create_race', name='create_race'),
     url(r'^work/(?P<roach_id>\d+)/$', 'work_for_food', name='work'),
     url(r'^work/abort/(?P<roach_id>\d+)/$', 'work_abort', name='work_abort'),

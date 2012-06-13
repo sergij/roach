@@ -1,11 +1,16 @@
 ﻿{% extends 'base.html' %}
 
 {% block content %}
+	
 		<h1 align='center'>Тараканьи бега</h1>
 		<div align="center">
+	{% if request.user.is_authenticated %}		
+		<a href="{% url index_game %}">Racing</a>
+	{% else %}
 		<div>
 		<a href="{% url account_login %}">Вход</a>
 		<a href="{% url account_register %}">Регистрация</a>
 		</div>
+		{% endif %}
 		</div>
 {% endblock %}
