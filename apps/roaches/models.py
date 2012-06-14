@@ -122,8 +122,9 @@ class Roach(models.Model):
             except Status.DoesNotExist:
                 status = Status.objects.create(status=0)
             try:
-                avatar = Avatar.objects.get(id=0)
-            except Avatar.DoesNotExist: pass
+                avatar = Avatar.objects.get(id=1)
+            except Avatar.DoesNotExist:
+                avatar = None
             new_box = Box.objects.create()
             return Roach.objects.create(nick=user.username, user=user, box=new_box, level=level, status=status, avatar=avatar)
 
