@@ -17,16 +17,11 @@ def what_are_doing(roach):
     hours = d.seconds/3600
     minutes = (d.seconds%3600)/60
     stat_time = [{'hours': hours, 'minutes': minutes, 'seconds': d.seconds-minutes*60-hours*3600,},]
-    #stat_time.append({'hours': hours})
-    #stat_time.append({})
-    #stat_time.append({})
     if roach.status == Status.objects.get(pk=1):
         stat_time.append({'mes': u"Вы сейчас на работе", 'val': "work"})
-        #stat_time.append({})
         return stat_time
     elif roach.status == Status.objects.get(pk=2):
         stat_time.append({'mes': u"Вы сейчас на репетиции балета", 'val': "train"})
-        #stat_time.append({})
         return stat_time
     return stat_time
     
@@ -80,7 +75,7 @@ def choose_opponent(request):
             error = u"Ты ещё не отошел от предыдущей гонки."
             return render(request, 'roaches/main.html',{'error':error, 'roach':roach})
         elif roach.status.status == 0:
-            roaches = Roach.objects.freenow().exclude(pk=roach)
+            roaches = Roach.objects.available().exclude(pk=roach)
             opponent = roaches[random.randint(0,len(roaches)-1)]
             return render(request, 'roaches/race_manager.html', {'errors':error,'opponent':opponent, 'roach':roach})
         else:
@@ -181,7 +176,7 @@ def work_for_food(request, roach_id):
         if form.is_valid():
             hours = int(form.cleaned_data['hours'])
             if hours > 0:
-                roach.status = Status.objects.get(status_name = 'work')
+                roach.status = Status.objects.get(status=0)
                 roach.end_time_status = datetime.datetime.now()+datetime.timedelta(hours=hours)
                 roach.temp_money = roach.level.price_for_work*hours
                 roach.save()
@@ -195,10 +190,10 @@ def work_for_food(request, roach_id):
 @login_required
 def work_abort(request, roach_id):
     roach = Roach.objects.get(id = roach_id)
-    roach.status = Status.objects.get(status_name = "free")
+    roach.status = Status.objects.get(status=0)
     roach.temp_money = 0
     roach.save()
-    return render(request, 'main/main.html',{'roach':roach})
+    return render(request, 'main/main.html', {})
     
 @login_required
 def train(request, roach_id):
@@ -208,7 +203,7 @@ def train(request, roach_id):
         if form.is_valid():
             hours = int(form.cleaned_data['hours'])
             if hours > 0:
-                roach.status = Status.objects.get(status_name = "train")
+                roach.status = Status.objects.get(status=2)
                 roach.end_time_status = datetime.datetime.now()+datetime.timedelta(hours = hours)
                 roach.temp_money = roach.level.price_for_work*hours
                 roach.money_2 -= hours*roach.level.price_for_work/2

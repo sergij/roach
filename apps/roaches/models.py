@@ -17,7 +17,7 @@ from lib.fields import AutoOneToOneField
 from lib.absmodels import TimestampedMixin, IndexedTimestampedMixin, TitledMixin, IndexedTimestampedSkipModifiedMixin
 from lib.manager import manager_from
 
-from manager_mixins import PublishedMixin, DeletedMixin, FreeMixin
+from manager_mixins import PublishedMixin, DeletedMixin, RoachMixin
 
 def get_uuid_name_generator(prefix=''):
     import uuid
@@ -95,6 +95,7 @@ class Roach(models.Model):
 
     exp_all = models.IntegerField(_(u"Опыт общий"),default = 0)
     exp_now = models.IntegerField(_(u"Опыт текущий"),default = 0)
+
     slot_1 = models.IntegerField(blank = True, null = True)
     slot_2 = models.IntegerField(blank = True, null = True)
     slot_3 = models.IntegerField(blank = True, null = True)
@@ -103,11 +104,10 @@ class Roach(models.Model):
 
     regenerate_time = models.DateTimeField(blank = True, null = True)
     end_time_status = models.DateTimeField(auto_now_add=True)
-    PREMIUM = models.BooleanField(_(u"Премиальный план"), default = False)
-    end_time_premium = models.DateTimeField(auto_now_add=True)
+
     is_banned = models.BooleanField(default = False)
 
-    objects = manager_from(FreeMixin)
+    objects = manager_from(RoachMixin)
     @staticmethod
     def for_user(user):
         try:

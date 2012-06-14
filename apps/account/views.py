@@ -169,8 +169,8 @@ def password_reset(request,
         }
         form.save(**opts)
         return SuccessAjaxFormResponse(request, type='user', data={})
-    return render_popup(request, 'account/password_reset.html', {
-        'base': 'base_form.html',
+    return render(request, 'account/password_reset.html', {
+        'base': 'base.html',
         'form_url': reverse('account_password_reset'),
         'form': form
     })
