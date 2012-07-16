@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>{% block page_title %}Тараканьи бега{% endblock %}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}main/css/style.css" />
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}main/css/iefix.css" />
+    <![endif]-->
+    {% block extra_head %}
+    {% endblock %}
+</head>
+
+<body>
+<div class="site" align="center">
+    <div class="head">
+    {% block menu %}
+    {% endblock %}
+	</div>
+	<div class="content">
+    {% block content %}
+    {% endblock %}
+	</div>
+</div>
+</body>
+</html>
