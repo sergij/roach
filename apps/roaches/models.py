@@ -48,11 +48,6 @@ class Level(TitledMixin):
     class Meta:
         ordering = ['level']
     
-class Status(models.Model):
-    STATUS_CHOICE = ( (0, _(u'свободен')), (1, _(u'работает')), (2, _(u'тренеруется')))
-    status = models.IntegerField(_(u'Состояние таракана'), choices=STATUS_CHOICE, primary_key=True)
-    def __unicode__(self):
-        return u'{0}'.format(dict(self.STATUS_CHOICE)[self.status])
 
 class Garment(TitledMixin):
     img = models.ImageField(verbose_name=_(u"Вид одежки"),upload_to=get_uuid_name_generator('garment'))
@@ -60,6 +55,7 @@ class Garment(TitledMixin):
     class Meta:
         verbose_name = _(u'Одежда')
         verbose_name_plural = _(u'Одежда')
+
 
 class Box(models.Model):
     garment = models.ManyToManyField(Garment, null=True, blank=True)
@@ -70,13 +66,15 @@ class Box(models.Model):
         verbose_name = _(u'Сундук с одеждой')
         verbose_name_plural = _(u'Сундуки')
 
+
 class Roach(models.Model):
+    STATUS_CHOICE = ( (0, _(u'свободен')), (1, _(u'работает')), (2, _(u'тренеруется')))
     GENDER_CHOICES = ( ('F', _(u'Женский')), ('M', _(u'Мужской')),)
+
     user = AutoOneToOneField(User, related_name='roach', primary_key=True)
     box = AutoOneToOneField(Box, verbose_name=u'Сундук', related_name='+')
     level = models.ForeignKey(Level)
     avatar = models.ForeignKey(Avatar, blank = True, null = True)
-    status = models.ForeignKey(Status)
     nick = models.CharField(max_length=255, blank=True, default='', unique=True)
 
     money_1 = models.IntegerField(_(u"Внешний капитал"), default = 0)
@@ -106,6 +104,7 @@ class Roach(models.Model):
     end_time_status = models.DateTimeField(auto_now_add=True)
 
     is_banned = models.BooleanField(default = False)
+    status = models.IntegerField(_(u'Состояние таракана'), choices=STATUS_CHOICE, db_index=True, default=0)
 
     objects = manager_from(RoachMixin)
     @staticmethod
@@ -118,15 +117,11 @@ class Roach(models.Model):
             except Level.DoesNotExist:
                 level = Level.objects.create(level=1, title=u'Начинающий')
             try:
-                status = Status.objects.get(pk=0)
-            except Status.DoesNotExist:
-                status = Status.objects.create(status=0)
-            try:
                 avatar = Avatar.objects.get(id=1)
             except Avatar.DoesNotExist:
                 avatar = None
             new_box = Box.objects.create()
-            return Roach.objects.create(nick=user.username, user=user, box=new_box, level=level, status=status, avatar=avatar)
+            return Roach.objects.create(nick=user.username, user=user, box=new_box, level=level, avatar=avatar)
 
     def __unicode__(self):
         return u'{0}, владелец: {1}'.format(self.nick if self.nick else self.user, self.user.username)

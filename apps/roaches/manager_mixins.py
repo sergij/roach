@@ -18,4 +18,4 @@ class DeletedMixin(object):
 
 class RoachMixin(object):
     def available(qs):
-        return qs.filter(status__status=0, is_banned=False)
+        return qs.filter(status=0, is_banned=False)

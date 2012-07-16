@@ -3,7 +3,7 @@ from django.core.context_processors import request
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import  render, redirect, get_object_or_404
-from roaches.models import BaseSkillType, Level, Status, Box, Roach, RaceRoad, Race, Point, Harm, Avatar
+from roaches.models import BaseSkillType, Level, Box, Roach, RaceRoad, Race, Point, Harm, Avatar
 
 import datetime
 import random
@@ -17,10 +17,10 @@ def what_are_doing(roach):
     hours = d.seconds/3600
     minutes = (d.seconds%3600)/60
     stat_time = [{'hours': hours, 'minutes': minutes, 'seconds': d.seconds-minutes*60-hours*3600,},]
-    if roach.status == Status.objects.get(pk=1):
+    if roach.status == 1:
         stat_time.append({'mes': u"Вы сейчас на работе", 'val': "work"})
         return stat_time
-    elif roach.status == Status.objects.get(pk=2):
+    elif roach.status == 2:
         stat_time.append({'mes': u"Вы сейчас на репетиции балета", 'val': "train"})
         return stat_time
     return stat_time
@@ -29,10 +29,10 @@ def what_are_doing(roach):
 def game(request):
     roach = Roach.for_user(request.user)
     roach.regenerate_roach()
-    if roach.status.status == 1:
+    if roach.status == 1:
         time = roach.end_time_status
         if time < datetime.datetime.now():
-            roach.status = Status.objects.get(pk=0)
+            roach.status = 0
             roach.money_2 += roach.temp_money
             roach.temp_money = 0
             roach.save()
@@ -43,10 +43,11 @@ def game(request):
         seconds = d.seconds-minutes*60-hours*3600
         return render(request, 'roaches/main.html',
             {'roach':roach,'work':True, 'hours': hours, 'minutes':minutes, 'seconds':seconds})
-    elif roach.status.status == 2:
+
+    elif roach.status == 2:
         time = roach.end_time_status
         if time < datetime.datetime.now():
-            roach.status = Status.objects.get(pk=0)
+            roach.status = 0
             roach.exp_now += roach.temp_money
             roach.temp_money = 0
             roach.save()
@@ -60,32 +61,22 @@ def game(request):
 
 @login_required
 def choose_opponent(request):
-    error = None
-    if request.method == 'POST':
-        roach = Roach.objects.get(id = request.POST['id'])
-        while True:
-            roaches = Roach.objects.all().exclude(id = request.POST['id'])
-            opponent = roaches[random.randint(0,len(roaches)-1)]
-            if opponent.power < (opponent.level.max_power/2): regenerate_roach(opponent)
-            if opponent.power > (opponent.level.max_power/2): break
-        return render(request, 'roaches/race_manager.html',{'error':error,'opponent':opponent, 'roach':roach})
+    roach = Roach.for_user(request.user)
+    if roach.power < (roach.level.max_power/2):
+        error = u"Ты ещё не отошел от предыдущей гонки."
+        return render(request, 'roaches/main.html',{'error':error, 'roach':roach})
+    elif roach.status == 0:
+        roaches = Roach.objects.available().exclude(pk=roach)
+        opponent = roaches[random.randint(0,len(roaches)-1)]
+        return render(request, 'roaches/race_manager.html', {'opponent':opponent, 'roach':roach})
     else:
-        roach = Roach.for_user(request.user)
-        if roach.power < (roach.level.max_power/2):
-            error = u"Ты ещё не отошел от предыдущей гонки."
-            return render(request, 'roaches/main.html',{'error':error, 'roach':roach})
-        elif roach.status.status == 0:
-            roaches = Roach.objects.available().exclude(pk=roach)
-            opponent = roaches[random.randint(0,len(roaches)-1)]
-            return render(request, 'roaches/race_manager.html', {'errors':error,'opponent':opponent, 'roach':roach})
-        else:
-            temp = what_are_doing(roach)
-            return render(request, 'roaches/main.html', {'error':temp[1]['mes'], 'roach':roach,temp[1]['val']: True, 
-                                                    'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']})
+        temp = what_are_doing(roach)
+        return render(request, 'roaches/main.html', {'error':temp[1]['mes'], 'roach':roach,temp[1]['val']: True, 
+                                                'hours': temp[0]['hours'], 'minutes':temp[0]['minutes'], 'seconds':temp[0]['seconds']})
 
 def clars(roach_1, roach_2):
     level = min(roach_1.level.level, roach_2.level.level)
-    points = Point.objects.filter(race_road = RaceRoad.objects.get(level = level))
+    points = Point.objects.filter(race_road=RaceRoad.objects.get(level=level))
     carma_1 = 0
     carma_2 = 0
     log = []
@@ -149,7 +140,7 @@ def clars(roach_1, roach_2):
     roach_2.regenerate_time = datetime.datetime.now()
     roach_1.save()
     roach_2.save()
-    race = Race(road = RaceRoad.objects.get(level = level),
+    race = Race(road=RaceRoad.objects.get(level = level),
                                winner = winner.id,
                                prize = 0,
                                log = log)
@@ -176,7 +167,7 @@ def work_for_food(request, roach_id):
         if form.is_valid():
             hours = int(form.cleaned_data['hours'])
             if hours > 0:
-                roach.status = Status.objects.get(status=0)
+                roach.status = 0
                 roach.end_time_status = datetime.datetime.now()+datetime.timedelta(hours=hours)
                 roach.temp_money = roach.level.price_for_work*hours
                 roach.save()
@@ -190,7 +181,7 @@ def work_for_food(request, roach_id):
 @login_required
 def work_abort(request, roach_id):
     roach = Roach.objects.get(id = roach_id)
-    roach.status = Status.objects.get(status=0)
+    roach.status = 0
     roach.temp_money = 0
     roach.save()
     return render(request, 'main/main.html', {})
@@ -199,11 +190,11 @@ def work_abort(request, roach_id):
 def train(request, roach_id):
     roach = Roach.for_user(request.user)
     form = TrainingForm(request.POST or None)
-    if roach.status.status == 0:
+    if roach.status == 0:
         if form.is_valid():
             hours = int(form.cleaned_data['hours'])
             if hours > 0:
-                roach.status = Status.objects.get(status=2)
+                roach.status = 2
                 roach.end_time_status = datetime.datetime.now()+datetime.timedelta(hours = hours)
                 roach.temp_money = roach.level.price_for_work*hours
                 roach.money_2 -= hours*roach.level.price_for_work/2
@@ -223,7 +214,7 @@ def train_abort(request, roach_id):
     с проведенным на тренеровке вемени
     """
     roach = Roach.for_user(request.user)
-    roach.status = Status.objects.get(status=0)
+    roach.status = 0
     time = roach.end_time_status
     d = time - datetime.datetime.now()
     hours = d.seconds/3600 + 1
@@ -235,9 +226,9 @@ def train_abort(request, roach_id):
 
 @login_required 
 def view_race(request, race_id, roach_id):
-    race = Race.objects.get(id = race_id)
-    roach = Roach.objects.get(pk = roach_id)
-    winner = Roach.objects.get(pk = race.winner)
+    race = Race.objects.get(id=race_id)
+    roach = Roach.objects.get(pk=roach_id)
+    winner = Roach.objects.get(pk=race.winner)
     prize = race.prize
     roach_2 = race.roaches.all().exclude(pk = roach.id)[0]
     exec(compile('log='+race.log, '<string>', 'exec'))
