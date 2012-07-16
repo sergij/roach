@@ -3,7 +3,7 @@ from django.core.context_processors import request
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import  render, redirect, get_object_or_404
-from roaches.models import BaseSkillType, Level, Box, Roach, RaceRoad, Race, Point, Harm, Avatar
+from roaches.models import BaseSkillType, Level, Box, Roach, RaceRoad, Race, Point, Harm, Avatar, ResultDroped
 
 import datetime
 import random
@@ -76,61 +76,66 @@ def choose_opponent(request):
 
 def clars(roach_1, roach_2):
     level = min(roach_1.level.level, roach_2.level.level)
-    points = Point.objects.filter(race_road=RaceRoad.objects.get(level=level))
+    points = RaceRoad.objects.get(level=level).points.all()
     carma_1 = 0
     carma_2 = 0
     log = []
-    for i in xrange(len(points)):
+    for point in points:
         pen_1 = 0
         pen_2 = 0
+        harms = Harm.objects.all()
         if random.random()<float(roach_1.trick_skill)/(roach_1.trick_skill+roach_2.trick_skill):
-            harms = Harm.objects.all()
-            harm = harms[random.randint(0,len(harms)-1)]
+            random.shuffle(harms)
+            harm = harms[0]
             if random.random()<float(roach_2.agil_skill)/(roach_1.agil_skill+roach_2.agil_skill):
-                text = (harm.harm_text).replace('roach1',roach_1.roach_name)
-                text = text.replace('roach2',roach_2.roach_name)
+                text = (harm.harm_text).replace('roach1',roach_1.nick)
+                text = text.replace('roach2',roach_2.nick)
                 log.append({0:text})
-                text = (harm.unharm_text).replace('roach1',roach_1.roach_name)
-                text = text.replace('roach2',roach_2.roach_name)
+                text = (harm.unharm_text).replace('roach1',roach_1.nick)
+                text = text.replace('roach2',roach_2.nick)
                 log.append({0:text})
             else:
-                text = (harm.harm_text).replace('roach1',roach_1.roach_name)
-                text = text.replace('roach2',roach_2.roach_name)
+                text = (harm.harm_text).replace('roach1',roach_1.nick)
+                text = text.replace('roach2',roach_2.nick)
                 log.append({0:text})
         if random.random()<float(roach_2.trick_skill)/(roach_1.trick_skill+roach_2.trick_skill):
-            harms = Harm.objects.all()
-            harm = harms[random.randint(0,len(harms)-1)]
+            random.shuffle(harms)
+            harm = harms[0]
             if random.random()<float(roach_1.agil_skill)/(roach_1.agil_skill+roach_2.agil_skill):
-                text = (harm.harm_text).replace('roach1',roach_2.roach_name)
-                text = text.replace('roach2',roach_1.roach_name)
+                text = (harm.harm_text).replace('roach1',roach_2.nick)
+                text = text.replace('roach2',roach_1.nick)
                 log.append({0:text})
-                text = (harm.unharm_text).replace('roach1',roach_2.roach_name)
-                text = text.replace('roach2',roach_1.roach_name)
+                text = (harm.unharm_text).replace('roach1',roach_2.nick)
+                text = text.replace('roach2',roach_1.nick)
                 log.append({0:text})
             else:
-                text = (harm.harm_text).replace('roach1',roach_2.roach_name)
-                text = text.replace('roach2',roach_1.roach_name)
+                text = (harm.harm_text).replace('roach1',roach_2.nick)
+                text = text.replace('roach2',roach_1.nick)
                 log.append({0:text})
-        pen_1 = (not points[i].pow_skill==0)*roach_1.pow_skill - points[i].pow_skill + (not points[i].speed_skill==0)*roach_1.speed_skill - points[i].speed_skill + (not points[i].intel_skill==0)*roach_1.intel_skill - points[i].intel_skill   
-        pen_2 = (not points[i].pow_skill==0)*roach_2.pow_skill - points[i].pow_skill + (not points[i].speed_skill==0)*roach_2.speed_skill - points[i].speed_skill + (not points[i].intel_skill==0)*roach_2.intel_skill - points[i].intel_skill
-        roach_1.power-=points[i].power
-        roach_2.power-=points[i].power
-        try: text = points[i].runinglog_set.get(value = pen_1)
-        except: text = points[0].runinglog_set.all()[0]
-        log.append({0:text.text.replace('roach',roach_1.roach_name)})
+        pen_1 = (not point.pow_skill==0)*roach_1.pow_skill - point.pow_skill + (not point.speed_skill==0)*roach_1.speed_skill - point.speed_skill + (not point.intel_skill==0)*roach_1.intel_skill - point.intel_skill   
+        pen_2 = (not point.pow_skill==0)*roach_2.pow_skill - point.pow_skill + (not point.speed_skill==0)*roach_2.speed_skill - point.speed_skill + (not point.intel_skill==0)*roach_2.intel_skill - point.intel_skill
+        roach_1.power-=point.power
+        roach_2.power-=point.power
+        try:
+            text = point.logs.get(value=pen_1)
+        except: 
+            text = points[0].logs.all()[0]
+        log.append({0:text.text.replace('roach',roach_1.nick)})
         carma_1 += pen_1
         carma_2 += pen_2
     if carma_1 >= carma_2:
         winner = roach_1
         diff = roach_2.level.level - roach_1.level.level
-        try: result = ResultDroped.objects.get(differenc = diff)
-        except: pass
+        try: 
+            result = ResultDroped.objects.get(differenc = diff)
+        except:
+            result = ResultDroped.objects.get(id=1)
         if not result is None:
             roach_1.exp_now += result.exp
     else:
         winner = roach_2
         diff = roach_1.level.level - roach_2.level.level
-        try: result = ResultDroped.objects.get(differenc = diff)
+        try: result = ResultDroped.objects.get(differenc=diff)
         except: pass
         if not result is None:
             roach_2.exp_now += result.exp
@@ -140,10 +145,10 @@ def clars(roach_1, roach_2):
     roach_2.regenerate_time = datetime.datetime.now()
     roach_1.save()
     roach_2.save()
-    race = Race(road=RaceRoad.objects.get(level = level),
-                               winner = winner.id,
-                               prize = 0,
-                               log = log)
+    race = Race(road=RaceRoad.objects.get(level=level),
+                               winner=winner,
+                               prize=0,
+                               log=log)
     race.save()
     race.roaches.add(roach_1,roach_2)
     return race.id
@@ -230,7 +235,7 @@ def view_race(request, race_id, roach_id):
     roach = Roach.objects.get(pk=roach_id)
     winner = Roach.objects.get(pk=race.winner)
     prize = race.prize
-    roach_2 = race.roaches.all().exclude(pk = roach.id)[0]
+    roach_2 = race.roaches.all().exclude(pk=roach)[0]
     exec(compile('log='+race.log, '<string>', 'exec'))
     return render(request, 'roaches/race_result.html',{'roach':roach, 'prize':prize, 'winner':winner, 'opponent':roach_2, 'log':log})
 

@@ -149,7 +149,7 @@ class RaceRoad(models.Model):
     level = models.ForeignKey(Level)
     points = models.ManyToManyField('Point', related_name='raceroads')
     def __unicode__(self):
-        return (self.road_name + ' ' + self.level.level_name)
+        return (self.road_name + ' ' + self.level.title)
     class Meta:
         ordering = ['level']
         verbose_name = _(u'Гоночная трасса')
@@ -167,7 +167,7 @@ class Point(models.Model):
         verbose_name_plural = _(u'Контрольные точки')
 
     def __unicode__(self):
-        return (self.race_road.road_name + ' ' + str(self.position))
+        return u'{0}: <{1}>'.format(str(self.position), ", ".join(map (repr, self.raceroads.all())))
     
 class Race(IndexedTimestampedSkipModifiedMixin):
     road = models.ForeignKey(RaceRoad)
